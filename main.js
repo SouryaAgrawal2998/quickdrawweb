@@ -8,13 +8,20 @@ random_no = Math.floor((Math.random()*quick_draw_data_set.length)+1);
 Element_of_array = quick_draw_data_set[random_no];
 sketch = Element_of_array;
 document.getElementById("sketch_to_be_drawn").innerHTML = "Sketch To Be Drawn: "+Element_of_array;
-
+function preload(){
+    classifier= ml5.imageClassifier('DoodleNet');
+}
 function draw(){
     check_sketch();
     if(drawn_sketch == sketch){
         answer_holder = "set";
         score = score+1;
         document.getElementById("score").innerHTML = "Score: "+score;
+    }
+    strokeWeight(13);
+    stroke(0);
+    if(mouseIsPressed){
+        line(pmouseX,pmouseY,mouseX,mouseY);
     }
 }
 
@@ -45,4 +52,17 @@ function setup(){
     canvas = createCanvas(500,220);
     canvas.center();
     background("white");
+    canvas.mouseReleased(classifyCanvas);
+}
+function classifyCanvas(){
+    classifier.classify(canvas, gotResult);
+}
+function gotResult(error,results){
+    if(error){
+        console.error(error);
+    }
+     console.log(results);
+     drawn_sketch= results[0].label;
+     document.getElementById("yoursketch").innerHTML= "Your Sketch:"+ drawn_sketch;
+     document.getElementById("confidencep").innerHTML= Math.round(results[0].confidence*100)+" %";
 }
